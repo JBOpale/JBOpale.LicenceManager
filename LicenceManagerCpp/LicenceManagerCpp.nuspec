@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>JBOpale.LicenceManager.Cpp</id>
+    <version>0.0.0</version>
+    <authors>JB-Opale</authors>
+    <owners>JB-Opale</owners>
+    <description>Dependency-free C++ validator (x64 static library, MSVC) for JBOpale.LicenceManager licence keys: ECDSA P-256 verification through Windows CNG, machine code, custom fields. Validation only, no private key.</description>
+    <tags>licensing license-key licence ecdsa native cpp</tags>
+    <projectUrl>https://github.com/JBOpale/JBOpale.LicenceManager</projectUrl>
+    <repository type="git" url="https://github.com/JBOpale/JBOpale.LicenceManager.git" />
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright (c) 2026 JB-Opale</copyright>
+  </metadata>
+  <files>
+    <!-- API publique -->
+    <file src="include\LicenceValidator.h" target="build\native\include\" />
+
+    <!-- integration MSBuild automatique (AdditionalIncludeDirectories / AdditionalDependencies) -->
+    <file src="nuget\JBOpale.LicenceManager.Cpp.targets" target="build\native\" />
+
+    <!-- bibliotheque statique x64 / v145, Debug et Release -->
+    <file src="bin\x64\Debug\LicenceManagerCpp.lib" target="build\native\lib\x64\Debug\" />
+    <file src="bin\x64\Release\LicenceManagerCpp.lib" target="build\native\lib\x64\Release\" />
+  </files>
+</package>

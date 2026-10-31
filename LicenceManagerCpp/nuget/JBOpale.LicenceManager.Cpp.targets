@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Importe automatiquement par NuGet dans tout projet vcxproj referencant le package
+  JBOpale.LicenceManager.Cpp (convention "build/native/{packageId}.targets"). Ajoute le repertoire
+  d'includes et lie la bibliotheque statique correspondant a la configuration active
+  ($(Configuration) = Debug ou Release) du projet consommateur.
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)lib\x64\$(Configuration)\LicenceManagerCpp.lib;ws2_32.lib;bcrypt.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

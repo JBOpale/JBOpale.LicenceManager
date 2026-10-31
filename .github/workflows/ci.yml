@@ -1,0 +1,77 @@
+name: CI
+
+# Builds the solution (net48/net8.0 library, WPF KeyGenerator) and runs every test on Windows,
+# the only platform with WPF and DPAPI, then the C++ validator on Windows (CNG) and Linux (OpenSSL).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore
+        run: dotnet restore LicenceManager.sln
+
+      - name: Build
+        run: dotnet build LicenceManager.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test LicenceManager.sln --configuration Release --no-build
+
+  cpp-windows:
+    # C++ validator with CNG (bcrypt.dll), as shipped; MSVC toolset v145 (Visual Studio 18).
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: LicenceManagerCpp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build (x64 Release)
+        run: |
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * `
+            -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\amd64\MSBuild.exe | Select-Object -First 1
+          & $msbuild LicenceManagerCpp.sln /p:Configuration=Release /p:Platform=x64 /m /nologo
+          if ($LASTEXITCODE -ne 0) { throw "Build failed (exit $LASTEXITCODE)." }
+
+      - name: Cross-check .NET -> C++
+        run: |
+          .\bin\x64\Release\LicenceManagerCpp.Tests.exe
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
+
+      - name: Same machine code in .NET and C++
+        run: |
+          $cpp = (.\bin\x64\Release\LicenceManagerCpp.Tests.exe --machine-code).Trim()
+          $env:DOTNET_NOLOGO = '1'
+          $net = (dotnet run --project tools\vectorgen -- --machine-code | Select-Object -Last 1).Trim()
+          Write-Host "C++ : '$cpp'  .NET : '$net'"
+          if (-not $cpp -or $cpp -ne $net) { throw "Machine codes differ between .NET and C++." }
+
+      - name: Machine code tool
+        uses: actions/upload-artifact@v4
+        with:
+          name: LicenceManager.CodePoste
+          path: LicenceManagerCpp/bin/x64/Release/LicenceManager.CodePoste.exe
+          if-no-files-found: error
+
+  cpp-linux:
+    # Same validator with OpenSSL: quick format regression check outside Windows.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cmake -S LicenceManagerCpp -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+
+      - name: Cross-check .NET -> C++
+        run: ./build/LicenceManagerCpp.Tests

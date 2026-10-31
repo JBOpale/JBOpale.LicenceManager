@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LicenceManagerCpp", "LicenceManagerCpp.vcxproj", "{7B2E1B7E-2C1B-4F1E-9E3E-1D9C7B2E1B7E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LicenceManagerCpp.Tests", "test\LicenceManagerCpp.Tests.vcxproj", "{9A6E2C51-3B0D-4C2E-8B36-5B2B7B6C0A11}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MachineCodeTool", "tools\machinecode\MachineCodeTool.vcxproj", "{C3D1A5E4-6B2F-4A8D-9E71-2F5B8C4D6A93}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B2E1B7E-2C1B-4F1E-9E3E-1D9C7B2E1B7E}.Debug|x64.ActiveCfg = Debug|x64
+		{7B2E1B7E-2C1B-4F1E-9E3E-1D9C7B2E1B7E}.Debug|x64.Build.0 = Debug|x64
+		{7B2E1B7E-2C1B-4F1E-9E3E-1D9C7B2E1B7E}.Release|x64.ActiveCfg = Release|x64
+		{7B2E1B7E-2C1B-4F1E-9E3E-1D9C7B2E1B7E}.Release|x64.Build.0 = Release|x64
+		{9A6E2C51-3B0D-4C2E-8B36-5B2B7B6C0A11}.Debug|x64.ActiveCfg = Debug|x64
+		{9A6E2C51-3B0D-4C2E-8B36-5B2B7B6C0A11}.Debug|x64.Build.0 = Debug|x64
+		{9A6E2C51-3B0D-4C2E-8B36-5B2B7B6C0A11}.Release|x64.ActiveCfg = Release|x64
+		{9A6E2C51-3B0D-4C2E-8B36-5B2B7B6C0A11}.Release|x64.Build.0 = Release|x64
+		{C3D1A5E4-6B2F-4A8D-9E71-2F5B8C4D6A93}.Debug|x64.ActiveCfg = Debug|x64
+		{C3D1A5E4-6B2F-4A8D-9E71-2F5B8C4D6A93}.Debug|x64.Build.0 = Debug|x64
+		{C3D1A5E4-6B2F-4A8D-9E71-2F5B8C4D6A93}.Release|x64.ActiveCfg = Release|x64
+		{C3D1A5E4-6B2F-4A8D-9E71-2F5B8C4D6A93}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

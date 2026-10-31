@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>LicenceManager</RootNamespace>
+    <AssemblyName>LicenceManager</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <PackageId>JBOpale.LicenceManager</PackageId>
+    <Authors>JB-Opale</Authors>
+    <Company>JB-Opale</Company>
+    <Copyright>Copyright (c) 2026 JB-Opale</Copyright>
+    <Description>Compact, offline software licence keys signed with ECDSA P-256: issue and validate keys in .NET, with optional machine binding and custom fields. Keys are also readable by the dependency-free C++ validator (JBOpale.LicenceManager.Cpp).</Description>
+    <PackageTags>licensing;license-key;licence;ecdsa;offline-activation;machine-binding</PackageTags>
+    <PackageProjectUrl>https://github.com/JBOpale/JBOpale.LicenceManager</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JBOpale/JBOpale.LicenceManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="LicenceManager.Tests" />
+    <InternalsVisibleTo Include="LicenceManager.VectorGen" />
+  </ItemGroup>
+
+</Project>

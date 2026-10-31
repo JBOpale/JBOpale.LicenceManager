@@ -1,0 +1,157 @@
+<Window x:Class="LicenceManager.KeyGeneratorApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="LicenceManager - Générateur de clés"
+        Height="1100" Width="640" MinHeight="1000" MinWidth="560"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Paire de clés -->
+        <GroupBox Grid.Row="0" Header="Paire de clés de signature (secrète)" Padding="8" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock x:Name="KeyStatusText" Text="Aucune paire de clés chargée." TextWrapping="Wrap" Margin="0,0,0,8" />
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="NewKeyPairButton" Content="Générer une nouvelle paire..." Padding="8,4" Margin="0,0,8,0" Click="NewKeyPairButton_Click" />
+                    <Button x:Name="LoadKeyPairButton" Content="Charger un fichier existant..." Padding="8,4" Margin="0,0,8,0" Click="LoadKeyPairButton_Click" />
+                    <Button x:Name="ExportBackupButton" Content="Exporter une sauvegarde..." Padding="8,4" IsEnabled="False" Click="ExportBackupButton_Click" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Générer une clé">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+        <!-- Nouvelle licence -->
+        <GroupBox Grid.Row="0" Header="Nouvelle licence" Padding="8" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Content="Client" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,4">
+                    <TextBox x:Name="ClientTextBox" TextChanged="ClientTextBox_TextChanged" />
+                    <TextBlock x:Name="ClientLengthText" FontSize="11" Foreground="Gray" Margin="0,2,0,0" />
+                </StackPanel>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Produit" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                    <ComboBox x:Name="ProfileComboBox" Width="260" SelectionChanged="ProfileComboBox_SelectionChanged" />
+                    <TextBlock Text="ID :" VerticalAlignment="Center" Margin="12,0,6,0" />
+                    <TextBox x:Name="ProductIdTextBox" Width="80" IsReadOnly="True" />
+                </StackPanel>
+
+                <Label Grid.Row="2" Grid.Column="0" Content="Expiration" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                    <DatePicker x:Name="ExpirationDatePicker" Width="140" />
+                    <CheckBox x:Name="NeverExpiresCheckBox" Content="Ne jamais expirer" VerticalAlignment="Center" Margin="12,0,0,0" Checked="NeverExpiresCheckBox_CheckedChanged" Unchecked="NeverExpiresCheckBox_CheckedChanged" />
+                </StackPanel>
+
+                <Label x:Name="FeaturesLabel" Grid.Row="3" Grid.Column="0" Content="Modules (Features)" VerticalAlignment="Top" Margin="0,4,0,0" />
+                <StackPanel x:Name="FeaturesPanel" Grid.Row="3" Grid.Column="1" Margin="0,4">
+                    <StackPanel x:Name="ModulesArea">
+                        <UniformGrid x:Name="ModulesPanel" Columns="3" />
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Button x:Name="CheckAllButton" Content="Tout cocher" Padding="8,2" Margin="0,0,8,0" Click="CheckAllButton_Click" />
+                            <Button x:Name="CheckNoneButton" Content="Aucun" Padding="8,2" Click="CheckNoneButton_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBlock Text="Masque (hex) :" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox x:Name="FeaturesTextBox" Width="190" FontFamily="Consolas" Text="0x0000000000000000" TextChanged="FeaturesTextBox_TextChanged" />
+                    </StackPanel>
+                    <TextBlock x:Name="FeaturesDecimalText" FontFamily="Consolas" Margin="0,4,0,0" />
+                    <TextBlock x:Name="FeaturesHelpText" FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+
+                <Label Grid.Row="4" Grid.Column="0" Content="Postes" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                    <TextBox x:Name="SeatsTextBox" Width="80" Text="0" />
+                    <TextBlock Text="0 = non limité" Foreground="Gray" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </StackPanel>
+
+                <Label Grid.Row="5" Grid.Column="0" Content="Poste" VerticalAlignment="Top" Margin="0,4,0,0" />
+                <StackPanel Grid.Row="5" Grid.Column="1" Margin="0,4">
+                    <CheckBox x:Name="BindMachineCheckBox" Content="Lier la licence à un poste" Checked="BindMachineCheckBox_Changed" Unchecked="BindMachineCheckBox_Changed" />
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBox x:Name="MachineCodeTextBox" Width="190" FontFamily="Consolas" IsEnabled="False" TextChanged="MachineCodeTextBox_TextChanged" />
+                        <TextBlock x:Name="MachineCodeStatusText" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </StackPanel>
+                    <TextBlock FontSize="11" Foreground="Gray" TextWrapping="Wrap" Margin="0,2,0,0"
+                               Text="Code fourni par l'utilitaire LicenceManager.CodePoste.exe (ou par le produit) sur le poste du client. Non coché : licence utilisable sur tout poste." />
+                </StackPanel>
+
+                <Label x:Name="FieldsLabel" Grid.Row="6" Grid.Column="0" Content="Informations produit" VerticalAlignment="Top" Margin="0,4,0,0" />
+                <StackPanel x:Name="FieldsPanel" Grid.Row="6" Grid.Column="1" Margin="0,4" />
+
+                <Button x:Name="GenerateButton" Grid.Row="7" IsEnabled="False" Grid.Column="1" Content="Générer la clé" Padding="10,6" HorizontalAlignment="Left" Margin="0,8,0,0" Click="GenerateButton_Click" />
+            </Grid>
+        </GroupBox>
+
+        <!-- Résultat -->
+        <GroupBox Grid.Row="1" Header="Résultat" Padding="8" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBox x:Name="ResultTextBox" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="14" Height="90" VerticalContentAlignment="Center" />
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="CopyButton" Content="Copier dans le presse-papiers" Padding="8,4" Margin="0,0,8,0" Click="CopyButton_Click" IsEnabled="False" />
+                    <TextBlock x:Name="SelfCheckText" VerticalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Clé publique -->
+        <GroupBox Grid.Row="2" Header="Intégration : clé publique" Padding="8" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,8"
+                           Text="Clé PUBLIQUE (aucun secret) à configurer dans les produits : LicenceValidator en .NET, licmgr::LicenceValidator::Configure en C++." />
+                <TextBox x:Name="PublicKeyTextBox" IsReadOnly="True" FontFamily="Consolas" TextWrapping="Wrap" />
+                <Button x:Name="CopyPublicKeyButton" Content="Copier la clé publique" Padding="8,4" Margin="0,8,0,0" HorizontalAlignment="Left" IsEnabled="False" Click="CopyPublicKeyButton_Click" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Historique de la session -->
+        <GroupBox Grid.Row="3" Header="Historique (session en cours)" Padding="8">
+            <ListBox x:Name="HistoryListBox" />
+        </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Tester une clé">
+                <StackPanel Margin="8">
+                    <TextBlock TextWrapping="Wrap" Foreground="Gray" Margin="0,0,0,8"
+                               Text="Vérifie une clé avec la paire de clés chargée : signature, produit, client, expiration, postes et modules. Le produit est reconnu automatiquement parmi ceux de products.json." />
+                    <TextBox x:Name="TestKeyTextBox" FontFamily="Consolas" FontSize="14" TextWrapping="Wrap" AcceptsReturn="False" Height="90" VerticalContentAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button x:Name="TestKeyButton" Content="Tester la clé" Padding="10,4" Margin="0,0,8,0" Click="TestKeyButton_Click" />
+                        <Button x:Name="TestPasteButton" Content="Coller" Padding="10,4" Margin="0,0,8,0" Click="TestPasteButton_Click" />
+                        <Button x:Name="TestLastButton" Content="Dernière clé générée" Padding="10,4" Click="TestLastButton_Click" />
+                    </StackPanel>
+                    <TextBlock x:Name="TestStatusText" FontWeight="Bold" FontSize="14" Margin="0,12,0,4" TextWrapping="Wrap" />
+                    <TextBox x:Name="TestDetailsTextBox" IsReadOnly="True" FontFamily="Consolas" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" MinHeight="220" BorderThickness="0" Background="Transparent" />
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>LicenceManager.KeyGeneratorApp</RootNamespace>
+    <AssemblyName>LicenceManager.KeyGenerator</AssemblyName>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <Reference Include="System.Security" />
+    <ProjectReference Include="..\LicenceManager\LicenceManager.csproj" />
+  </ItemGroup>
+
+</Project>
