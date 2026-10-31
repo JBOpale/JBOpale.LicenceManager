@@ -10,10 +10,13 @@
     <projectUrl>https://github.com/JBOpale/JBOpale.LicenceManager</projectUrl>
     <repository type="git" url="https://github.com/JBOpale/JBOpale.LicenceManager.git" />
     <license type="expression">MIT</license>
+    <icon>icon.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright (c) 2026 JB-Opale</copyright>
   </metadata>
   <files>
+    <file src="..\icon.png" target="" />
+
     <!-- API publique -->
     <file src="include\LicenceValidator.h" target="build\native\include\" />
 
