@@ -1,7 +1,9 @@
 name: Publish JBOpale.LicenceManager.Cpp
 
 # Tag 'cpp-v*' (e.g. cpp-v1.0.0): build (Debug + Release, x64), test and publish the native
-# NuGet package to nuget.org. Requires the repository secret NUGET_API_KEY.
+# NuGet package to nuget.org. Trusted publishing (no stored API key): needs a nuget.org trusted
+# publishing policy for this repository and this workflow file, and the repository secret
+# NUGET_USER (nuget.org profile name).
 on:
   push:
     tags:
@@ -12,6 +14,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
+      id-token: write # OIDC token exchanged for a short-lived nuget.org API key
     defaults:
       run:
         shell: pwsh
@@ -61,9 +64,15 @@ jobs:
         run: |
           & "${{ steps.nuget.outputs.NUGET_EXE }}" pack LicenceManagerCpp.nuspec -Version "${{ steps.version.outputs.VERSION }}" -OutputDirectory nupkg
 
+      - name: NuGet login (OIDC, short-lived API key)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Publish to nuget.org
         run: |
           dotnet nuget push nupkg\*.nupkg `
             --source "https://api.nuget.org/v3/index.json" `
-            --api-key "${{ secrets.NUGET_API_KEY }}" `
+            --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" `
             --skip-duplicate
