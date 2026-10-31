@@ -9,7 +9,9 @@ on:
 
 jobs:
   build-test:
-    runs-on: windows-latest
+    # Runner local : on n'exécute pas le code de pull requests venant de forks.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +27,9 @@ jobs:
 
   cpp-windows:
     # C++ validator with CNG (bcrypt.dll), as shipped; MSVC toolset v145 (Visual Studio 18).
-    runs-on: windows-latest
+    # Runner local : on n'exécute pas le code de pull requests venant de forks.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
     defaults:
       run:
         shell: pwsh
