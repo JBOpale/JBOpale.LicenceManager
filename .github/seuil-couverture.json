@@ -1,0 +1,4 @@
+{
+  "_commentaire": "Seuil de couverture globale des lignes (%), lu par .github/scripts/Test-Coverage.ps1. Valeur provisoire : mesure complète (net48 + WPF) impossible hors Windows ; à relever (jamais baisser) selon le ::notice:: du premier run sur SURFACE-BOOK-3.",
+  "lineCoverage": 55
+}

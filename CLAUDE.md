@@ -48,3 +48,16 @@ Cette règle s'applique à tout nouveau workflow créé dans `.github/workflows/
 - Toute session utilise le skill `suivi-actions` pour tenir ce tableau à jour à la fin de chaque chantier et chaque fois qu'elle rend la main avec une action qui dépend de lui (décision, validation, étape manuelle, secret à créer, PR à fusionner, ruleset à importer, réponse externe).
 - Lire l'existant avant d'ajouter (pas de doublon) ; passer à `doing`/`done` ce qui avance.
 - Jamais de secret dans le tableau ; ne jamais supprimer une action.
+
+## Règle : couverture de code
+
+- Chaque pull request doit couvrir par des tests **au moins 90 % des lignes C# qu'elle ajoute ou modifie** (hors projets de tests, `Migrations/`, `obj/`), et la **couverture globale des lignes ne doit jamais baisser** sous le seuil de `.github/seuil-couverture.json`.
+- Le contrôle est l'étape « Couverture (90 % du code modifié, global au moins au seuil) » du job requis « LicenceManager - Tests PR » : coverlet (`coverage.runsettings`, format Cobertura) sur toutes les suites .NET, puis `.github/scripts/Test-Coverage.ps1`. Le validateur C++ n'est pas mesuré (pas d'outil fiable pour MSVC sur le runner) : la règle porte sur le code .NET.
+- Le seuil global ne se relève qu'à la hausse (valeur entière = mesure arrondie à l'inférieur), quand le script l'indique par un `::notice::`. Ne jamais l'abaisser.
+- Ne jamais exclure du code de la mesure (attribut, filtre, runsettings), abaisser un seuil ni ajouter de `Skip` pour faire passer une PR.
+- Toute session lance la mesure et le script avant d'ouvrir ou de mettre à jour une PR, et ajoute les tests manquants :
+  ```
+  dotnet test <projet de tests> --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults/<projet>
+  pwsh .github/scripts/Test-Coverage.ps1 -ReportsDir TestResults -BaseRef origin/dev
+  ```
+- Tout nouveau projet de tests est lancé avec la collecte de couverture dans `pr-tests.yml`.

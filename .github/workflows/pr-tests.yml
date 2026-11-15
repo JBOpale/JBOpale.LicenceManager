@@ -46,6 +46,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historique complet : diff contre la branche de base pour la couverture
 
       - name: Restore
         run: |
@@ -69,13 +71,27 @@ jobs:
 
       - name: Test LicenceManager.Tests (net48 + net8.0)
         run: |
-          dotnet test LicenceManager.Tests/LicenceManager.Tests.csproj --configuration Release --no-build
+          dotnet test LicenceManager.Tests/LicenceManager.Tests.csproj --configuration Release --no-build `
+            --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults/LicenceManager.Tests
           if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
 
       - name: Test LicenceManager.KeyGenerator.Tests (net48)
         run: |
-          dotnet test LicenceManager.KeyGenerator.Tests/LicenceManager.KeyGenerator.Tests.csproj --configuration Release --no-build
+          dotnet test LicenceManager.KeyGenerator.Tests/LicenceManager.KeyGenerator.Tests.csproj --configuration Release --no-build `
+            --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults/LicenceManager.KeyGenerator.Tests
           if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
+
+      # Couverture (coverlet, Cobertura) de toutes les suites .NET, net48 compris. Le validateur C++
+      # n'est pas mesuré (pas d'outil de couverture fiable pour MSVC sur le runner) : la règle porte
+      # sur le code .NET. Voir CLAUDE.md, « Règle : couverture de code ».
+      - name: Couverture (90 % du code modifié, global au moins au seuil)
+        if: ${{ !cancelled() }}
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $base = ''
+          if ($env:BASE_REF) { $base = "origin/$($env:BASE_REF)" }
+          ./.github/scripts/Test-Coverage.ps1 -ReportsDir TestResults -BaseRef $base
 
       - name: Build C++ (x64 Release, CNG)
         working-directory: LicenceManagerCpp
