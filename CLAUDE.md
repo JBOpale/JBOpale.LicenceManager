@@ -32,3 +32,19 @@ Cette règle s'applique à tout nouveau workflow créé dans `.github/workflows/
 - Plus de push direct sur les branches protégées (`dev`, `main`) : toute modification passe par une pull request.
 - Tout nouveau projet ou nouvelle suite de tests doit être ajouté à `pr-tests.yml` (une étape `dotnet test` par projet).
 - Le ruleset correspondant est versionné dans `.github/rulesets/tests-obligatoires.json` (import via Settings → Rules → Rulesets → Import a ruleset).
+
+## Règle : aucun paquet vulnérable avant de passer sur main
+
+- Aucune modification n'arrive sur `main` ou `dev` avec un paquet présentant une vulnérabilité **haute ou critique**, directe ou transitive.
+- Le contrôle est l'étape « Paquets vulnérables (haute / critique) » du job requis « LicenceManager - Tests PR » (`.github/workflows/pr-tests.yml`), via `.github/scripts/check-vulnerable-packages.ps1` (`dotnet list package --vulnerable --include-transitive`) : il fait partie du check requis, pas d'un job séparé. Les vulnérabilités faibles/modérées sont signalées en avertissement.
+- Toute session lance ce contrôle localement (`pwsh .github/scripts/check-vulnerable-packages.ps1 LicenceManager.sln LicenceManagerCpp/tools/vectorgen/vectorgen.csproj` après restauration) avant d'ouvrir ou de mettre à jour une PR.
+- Correction : mise à jour de la dépendance, ou épinglage d'une version corrigée pour une dépendance transitive, avec un commentaire citant l'avis GHSA ; puis relancer build et tests.
+- Ne jamais retirer, ignorer ou contourner ce contrôle, ni baisser son seuil.
+- Tout nouveau projet doit être couvert par le contrôle (inclus dans `LicenceManager.sln` ou ajouté à la liste de l'étape).
+
+## Règle : suivi des actions en cours
+
+- Jérôme suit les actions en attente de tous ses projets dans le tableau « Suivi des actions » (https://claude.ai/artifact/41ayfFGBTCRjpUJH4pgf1P).
+- Toute session utilise le skill `suivi-actions` pour tenir ce tableau à jour à la fin de chaque chantier et chaque fois qu'elle rend la main avec une action qui dépend de lui (décision, validation, étape manuelle, secret à créer, PR à fusionner, ruleset à importer, réponse externe).
+- Lire l'existant avant d'ajouter (pas de doublon) ; passer à `doing`/`done` ce qui avance.
+- Jamais de secret dans le tableau ; ne jamais supprimer une action.

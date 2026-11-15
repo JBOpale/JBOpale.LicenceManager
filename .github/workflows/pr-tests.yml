@@ -1,7 +1,8 @@
 name: Tests PR
 
 # Check requis par le ruleset .github/rulesets/tests-obligatoires.json : « LicenceManager - Tests PR ».
-# Compile la solution et lance TOUTES les suites de tests (.NET net48/net8.0 et validateur C++ CNG).
+# Contrôle les paquets NuGet vulnérables, compile la solution et lance TOUTES les suites de tests
+# (.NET net48/net8.0 et validateur C++ CNG).
 #
 # Règles (voir CLAUDE.md) :
 #   - jamais de filtre `paths` ni de condition `if:` qui ferait sauter le job : un job sauté compte
@@ -50,6 +51,16 @@ jobs:
         run: |
           dotnet restore LicenceManager.sln
           if ($LASTEXITCODE -ne 0) { throw "Restore failed (exit $LASTEXITCODE)." }
+          dotnet restore LicenceManagerCpp/tools/vectorgen/vectorgen.csproj
+          if ($LASTEXITCODE -ne 0) { throw "Restore failed (exit $LASTEXITCODE)." }
+
+      # Fait partie du check requis : échoue sur toute vulnérabilité haute/critique (directe ou
+      # transitive), avertit pour faible/modérée. Tous les projets sont de style SDK (net48 compris),
+      # d'où `dotnet list package --vulnerable` plutôt que NuGetAudit. Tout nouveau projet hors de
+      # LicenceManager.sln doit être ajouté à la liste ci-dessous.
+      - name: Paquets vulnérables (haute / critique)
+        run: |
+          ./.github/scripts/check-vulnerable-packages.ps1 LicenceManager.sln LicenceManagerCpp/tools/vectorgen/vectorgen.csproj
 
       - name: Build
         run: |
