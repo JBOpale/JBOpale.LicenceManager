@@ -12,9 +12,13 @@ on:
 
 jobs:
   build-test:
+    name: LicenceManager - Build et tests .NET
     # Pull requests : couvert par pr-tests.yml (évite un double run sur le runner local).
     if: github.event_name != 'pull_request'
     runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +33,7 @@ jobs:
         run: dotnet test LicenceManager.sln --configuration Release --no-build
 
   cpp-windows:
+    name: LicenceManager - Validateur C++ Windows
     # C++ validator with CNG (bcrypt.dll), as shipped; MSVC toolset v145 (Visual Studio 18).
     # Pull requests : couvert par pr-tests.yml (évite un double run sur le runner local).
     if: github.event_name != 'pull_request'
@@ -69,6 +74,7 @@ jobs:
           if-no-files-found: error
 
   cpp-linux:
+    name: LicenceManager - Validateur C++ Linux
     # Same validator with OpenSSL: quick format regression check outside Windows.
     runs-on: ubuntu-latest
     steps:

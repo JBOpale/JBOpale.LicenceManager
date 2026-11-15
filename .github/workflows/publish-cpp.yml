@@ -10,6 +10,7 @@ on:
 
 jobs:
   publish:
+    name: LicenceManager - Publication NuGet C++
     runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
     permissions:
       contents: read
