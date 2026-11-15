@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Règle de couverture de code (voir CLAUDE.md) : 90 % des lignes C# ajoutées/modifiées par la PR,
   et couverture globale des lignes jamais sous le seuil de .github/seuil-couverture.json.

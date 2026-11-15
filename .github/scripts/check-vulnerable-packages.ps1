@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Contrôle des paquets NuGet vulnérables (directs et transitifs) : échoue sur toute vulnérabilité
   HAUTE ou CRITIQUE, signale les vulnérabilités faibles/modérées en avertissement.
