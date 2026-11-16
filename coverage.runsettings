@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Couverture de code commune à toutes les suites de tests (coverlet, format Cobertura).
+     Utilisé par pr-tests.yml (dotnet test, collecteur XPlat Code Coverage).
+     Ne pas exclure CompilerGeneratedAttribute (retirerait méthodes async et lambdas) ;
+     n'ajouter aucune exclusion pour faire passer le seuil (voir CLAUDE.md). -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <ExcludeByAttribute>GeneratedCodeAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <ExcludeByFile>**/obj/**,**/Migrations/**</ExcludeByFile>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <SingleHit>false</SingleHit>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

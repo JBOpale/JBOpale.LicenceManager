@@ -1,0 +1,4 @@
+{
+  "_commentaire": "Seuil de couverture globale des lignes (%), lu par .github/scripts/Test-Coverage.ps1. Relevé uniquement à la hausse (mesure arrondie à l'inférieur, cf. ::notice:: du job requis). Mesure du 16/11/2026 sur SURFACE-BOOK-3 : 63,74 % (703/1103).",
+  "lineCoverage": 63
+}

@@ -1,0 +1,118 @@
+name: Tests PR
+
+# Check requis par le ruleset .github/rulesets/tests-obligatoires.json : « LicenceManager - Tests PR ».
+# Contrôle les paquets NuGet vulnérables, compile la solution et lance TOUTES les suites de tests
+# (.NET net48/net8.0 et validateur C++ CNG).
+#
+# Règles (voir CLAUDE.md) :
+#   - jamais de filtre `paths` ni de condition `if:` qui ferait sauter le job : un job sauté compte
+#     comme réussi et un check requis absent bloque la PR ;
+#   - tout nouveau projet de tests doit être ajouté ici.
+#
+# Sécurité : le dépôt est public et le runner SURFACE-BOOK-3 est une machine locale. Les PR venant
+# d'un fork sont envoyées sur ubuntu-latest, où la première étape échoue : le code du fork n'est
+# jamais exécuté sur le runner self-hosted, et le check reste rouge (pas sauté).
+on:
+  pull_request:
+    branches: [dev, main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: LicenceManager - Tests PR
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && fromJSON('["ubuntu-latest"]') || fromJSON('["self-hosted","Windows","SURFACE-BOOK-3"]') }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Refuser les PR venant d'un fork
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if ($env:IS_PR -eq 'true' -and $env:HEAD_REPO -ne '${{ github.repository }}') {
+            Write-Host "::error::PR venant d'un fork ($env:HEAD_REPO) : les tests ne sont pas exécutés sur le runner self-hosted. Un mainteneur doit reprendre la branche dans le dépôt."
+            exit 1
+          }
+          Write-Host "PR interne ou lancement manuel : OK."
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historique complet : diff contre la branche de base pour la couverture
+
+      - name: Restore
+        run: |
+          dotnet restore LicenceManager.sln
+          if ($LASTEXITCODE -ne 0) { throw "Restore failed (exit $LASTEXITCODE)." }
+          dotnet restore LicenceManagerCpp/tools/vectorgen/vectorgen.csproj
+          if ($LASTEXITCODE -ne 0) { throw "Restore failed (exit $LASTEXITCODE)." }
+
+      # Fait partie du check requis : échoue sur toute vulnérabilité haute/critique (directe ou
+      # transitive), avertit pour faible/modérée. Tous les projets sont de style SDK (net48 compris),
+      # d'où `dotnet list package --vulnerable` plutôt que NuGetAudit. Tout nouveau projet hors de
+      # LicenceManager.sln doit être ajouté à la liste ci-dessous.
+      - name: Paquets vulnérables (haute / critique)
+        run: |
+          ./.github/scripts/check-vulnerable-packages.ps1 LicenceManager.sln LicenceManagerCpp/tools/vectorgen/vectorgen.csproj
+
+      - name: Build
+        run: |
+          dotnet build LicenceManager.sln --configuration Release --no-restore
+          if ($LASTEXITCODE -ne 0) { throw "Build failed (exit $LASTEXITCODE)." }
+
+      - name: Test LicenceManager.Tests (net48 + net8.0)
+        run: |
+          dotnet test LicenceManager.Tests/LicenceManager.Tests.csproj --configuration Release --no-build `
+            --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults/LicenceManager.Tests
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
+
+      - name: Test LicenceManager.KeyGenerator.Tests (net48)
+        run: |
+          dotnet test LicenceManager.KeyGenerator.Tests/LicenceManager.KeyGenerator.Tests.csproj --configuration Release --no-build `
+            --collect:"XPlat Code Coverage" --settings coverage.runsettings --results-directory TestResults/LicenceManager.KeyGenerator.Tests
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
+
+      # Couverture (coverlet, Cobertura) de toutes les suites .NET, net48 compris. Le validateur C++
+      # n'est pas mesuré (pas d'outil de couverture fiable pour MSVC sur le runner) : la règle porte
+      # sur le code .NET. Voir CLAUDE.md, « Règle : couverture de code ».
+      - name: Couverture (90 % du code modifié, global au moins au seuil)
+        if: ${{ !cancelled() }}
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $base = ''
+          if ($env:BASE_REF) { $base = "origin/$($env:BASE_REF)" }
+          ./.github/scripts/Test-Coverage.ps1 -ReportsDir TestResults -BaseRef $base
+
+      - name: Build C++ (x64 Release, CNG)
+        working-directory: LicenceManagerCpp
+        run: |
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -products * `
+            -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\amd64\MSBuild.exe | Select-Object -First 1
+          if (-not $msbuild) { throw "MSBuild not found (vswhere returned nothing)." }
+          & $msbuild LicenceManagerCpp.sln /p:Configuration=Release /p:Platform=x64 /m /nologo
+          if ($LASTEXITCODE -ne 0) { throw "Build failed (exit $LASTEXITCODE)." }
+
+      - name: Test C++ (cross-check .NET -> C++)
+        working-directory: LicenceManagerCpp
+        run: |
+          .\bin\x64\Release\LicenceManagerCpp.Tests.exe
+          if ($LASTEXITCODE -ne 0) { throw "Tests failed (exit $LASTEXITCODE)." }
+
+      - name: Test same machine code in .NET and C++
+        working-directory: LicenceManagerCpp
+        run: |
+          $cpp = (.\bin\x64\Release\LicenceManagerCpp.Tests.exe --machine-code).Trim()
+          $env:DOTNET_NOLOGO = '1'
+          $net = (dotnet run --project tools\vectorgen -- --machine-code | Select-Object -Last 1).Trim()
+          Write-Host "C++ : '$cpp'  .NET : '$net'"
+          if (-not $cpp -or $cpp -ne $net) { throw "Machine codes differ between .NET and C++." }

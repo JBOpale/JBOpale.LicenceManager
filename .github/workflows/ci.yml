@@ -5,13 +5,20 @@ name: CI
 on:
   push:
     branches: [main]
+  # Sur les pull requests, la solution .NET et le validateur C++ Windows sont testés par
+  # pr-tests.yml (check requis « LicenceManager - Tests PR ») : ici, seul le job cpp-linux
+  # (backend OpenSSL, non couvert par pr-tests.yml) tourne encore sur pull_request.
   pull_request:
 
 jobs:
   build-test:
-    # Runner local : on n'exécute pas le code de pull requests venant de forks.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    name: LicenceManager - Build et tests .NET
+    # Pull requests : couvert par pr-tests.yml (évite un double run sur le runner local).
+    if: github.event_name != 'pull_request'
     runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,9 +33,10 @@ jobs:
         run: dotnet test LicenceManager.sln --configuration Release --no-build
 
   cpp-windows:
+    name: LicenceManager - Validateur C++ Windows
     # C++ validator with CNG (bcrypt.dll), as shipped; MSVC toolset v145 (Visual Studio 18).
-    # Runner local : on n'exécute pas le code de pull requests venant de forks.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Pull requests : couvert par pr-tests.yml (évite un double run sur le runner local).
+    if: github.event_name != 'pull_request'
     runs-on: [self-hosted, Windows, SURFACE-BOOK-3]
     defaults:
       run:
@@ -66,6 +74,7 @@ jobs:
           if-no-files-found: error
 
   cpp-linux:
+    name: LicenceManager - Validateur C++ Linux
     # Same validator with OpenSSL: quick format regression check outside Windows.
     runs-on: ubuntu-latest
     steps:
