@@ -61,3 +61,10 @@ Cette règle s'applique à tout nouveau workflow créé dans `.github/workflows/
   pwsh .github/scripts/Test-Coverage.ps1 -ReportsDir TestResults -BaseRef origin/dev
   ```
 - Tout nouveau projet de tests est lancé avec la collecte de couverture dans `pr-tests.yml`.
+
+## Règle : tout développement part de `dev`, jamais de `main`
+
+- Le dépôt LicenceManager a deux branches permanentes : `dev` (intégration) et `main` (production). `dev` est la branche par défaut du dépôt.
+- Toute branche de travail (`feature/…`, `fix/…`, `claude/…`) est créée depuis `dev` à jour (`git fetch origin dev && git checkout -b <branche> origin/dev`), jamais depuis `main`, et sa PR cible `dev`.
+- `main` ne reçoit que des PR `dev` → `main`, sur validation explicite de Jérôme. Aucun commit ni aucune branche de travail ne part de `main` (seule exception : un correctif urgent de production, sur demande explicite, ensuite reporté dans `dev`).
+- Si une session démarre sur `main` ou sur une branche qui n'est pas basée sur `dev`, elle se rebase/recrée sur `origin/dev` avant le premier commit.
